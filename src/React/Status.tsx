@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const CategoryIcons = {
   "Edtech project": (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.28 -1.28 18.56 18.56" fill="currentColor" className="w-6 h-6 text-[var(--sec)] opacity-70"> <path d="M13 0L16 3L9 10H6V7L13 0Z"></path> <path d="M1 1V15H15V9H13V13H3V3H7V1H1Z"></path></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 53 53" fill="currentColor" className="w-6 h-6 text-[var(--sec)] opacity-70"><path d="M30.133 1.552c-1.090-1.044-2.291-1.573-3.574-1.573-2.006 0-3.47 1.296-3.87 1.693-0.564 0.558-19.786 19.788-19.786 19.788-0.126 0.126-0.217 0.284-0.264 0.456-0.433 1.602-2.605 8.71-2.627 8.782-0.112 0.364-0.012 0.761 0.256 1.029 0.193 0.192 0.45 0.295 0.713 0.295 0.104 0 0.208-0.016 0.31-0.049 0.073-0.024 7.41-2.395 8.618-2.756 0.159-0.048 0.305-0.134 0.423-0.251 0.763-0.754 18.691-18.483 19.881-19.712 1.231-1.268 1.843-2.59 1.819-3.925-0.025-1.319-0.664-2.589-1.901-3.776zM22.37 4.87c0.509 0.123 1.711 0.527 2.938 1.765 1.24 1.251 1.575 2.681 1.638 3.007-3.932 3.912-12.983 12.867-16.551 16.396-0.329-0.767-0.862-1.692-1.719-2.555-1.046-1.054-2.111-1.649-2.932-1.984 3.531-3.532 12.753-12.757 16.625-16.628zM4.387 23.186c0.55 0.146 1.691 0.57 2.854 1.742 0.896 0.904 1.319 1.9 1.509 2.508-1.39 0.447-4.434 1.497-6.367 2.121 0.573-1.886 1.541-4.822 2.004-6.371zM28.763 7.824c-0.041 0.042-0.109 0.11-0.19 0.192-0.316-0.814-0.87-1.86-1.831-2.828-0.981-0.989-1.976-1.572-2.773-1.917 0.068-0.067 0.12-0.12 0.141-0.14 0.114-0.113 1.153-1.106 2.447-1.106 0.745 0 1.477 0.34 2.175 1.010 0.828 0.795 1.256 1.579 1.27 2.331 0.014 0.768-0.404 1.595-1.24 2.458z"></path></svg>
   ),
   "Graduating early": (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 0 32 32" fill="currentColor" className="w-6 h-6 text-[var(--sec)] opacity-70"><path d="M21.080 12.84l-8.92-3.24c-0.4-0.16-0.88-0.2-1.16-0.2-0.32 0-0.76 0.040-1.16 0.2l-8.92 3.24c-0.84 0.32-0.92 0.88-0.92 1.12s0.080 0.8 0.92 1.12l0.4 0.12v3.32c0 0.48 0.36 0.84 0.84 0.84s0.84-0.36 0.84-0.84v-2.72l1.56 0.56v3.76c0 1.64 3.84 2.44 6.44 2.44s6.44-0.76 6.44-2.44v-3.72l3.64-1.32c0.84-0.28 0.92-0.88 0.92-1.12s-0.080-0.8-0.92-1.12zM15.8 19.92c-0.48 0.32-2.28 0.96-4.76 0.96s-4.32-0.64-4.76-0.96v-2.92l3.6 1.32c0.4 0.16 0.88 0.2 1.16 0.2s0.76-0.040 1.16-0.2l3.6-1.32v2.92zM11.6 16.72c-0.28 0.12-0.88 0.12-1.16 0l-7.64-2.76 7.6-2.76c0.28-0.12 0.88-0.12 1.16 0l7.64 2.76-7.6 2.76z"></path></svg>
@@ -13,8 +13,10 @@ const CategoryIcons = {
 };
 
 const Status = () => {
-  const [openItem, setOpenItem] = useState<string | null>(null);
-  const [lastOpenItem, setLastOpenItem] = useState<string | null>(null);
+  const [openItem, setOpenItem] = useState(null);
+  const [lastOpenItem, setLastOpenItem] = useState(null);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [imageCache, setImageCache] = useState({});
 
   const skills = {
     "Edtech project": [
@@ -31,7 +33,37 @@ const Status = () => {
     ],
   };
 
-  const toggleItem = (item: string) => {
+  // Preload all images when component mounts
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagePromises = Object.values(skills).map(([_, imageSrc]) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.src = imageSrc;
+          img.onload = () => {
+            setImageCache(prev => ({
+              ...prev,
+              [imageSrc]: img
+            }));
+            resolve(imageSrc);
+          };
+          img.onerror = reject;
+        });
+      });
+
+      try {
+        await Promise.all(imagePromises);
+        setImagesLoaded(true);
+      } catch (error) {
+        console.error("Failed to preload images:", error);
+        setImagesLoaded(true);
+      }
+    };
+
+    preloadImages();
+  }, []);
+
+  const toggleItem = (item) => {
     if (openItem === item) {
       setOpenItem(null);
       setLastOpenItem(item);
@@ -77,11 +109,15 @@ const Status = () => {
       <div className="lg:w-1/2 pt-3 md:pt-9 lg:pl-4 flex items-start justify-center">
         <div className="w-full text-[var(--white)] text-lg">
           <div className="relative w-full lg:h-80 h-64">
-            <img 
-              className={`absolute w-full h-full object-cover rounded-lg ${openItem ? 'opacity-30' : 'opacity-100'}`}
-              src={currentImageSrc}
-              alt={openItem ? skills[openItem][0] : "Background image"}
-            />
+            {imagesLoaded ? (
+              <img 
+                className={`absolute w-full h-full object-cover rounded-lg transition-opacity duration-300 ${openItem ? 'opacity-30' : 'opacity-100'}`}
+                src={currentImageSrc}
+                alt={openItem ? skills[openItem][0] : "Background image"}
+              />
+            ) : (
+              <div className="absolute w-full h-full bg-background rounded-lg animate-pulse"></div>
+            )}
             {openItem && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <p className="text-[var(--white)] p-4">
