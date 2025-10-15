@@ -28,7 +28,7 @@ const Status = () => {
       "/grad.png"
     ],
     "Hoo's Motor Club": [
-      "I always enjoy goint to meets and cruises here",
+      "I always enjoy going to meets and cruises here",
       "/car.png"
     ],
   };
