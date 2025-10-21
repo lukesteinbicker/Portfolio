@@ -20,7 +20,7 @@ const Status = () => {
 
   const skills = {
     "Working": [
-      "Currently building something to improve customer service for small businesses",
+      "Currently building something to improve customer service for small and mid-sized businesses",
       "/school.png"
     ],
     "Graduating early": [
@@ -28,7 +28,7 @@ const Status = () => {
       "/grad.png"
     ],
     "Hoo's Motor Club": [
-      "I always enjoy going to meets and cruises here",
+      "I always enjoy going to meets here",
       "/car.png"
     ],
   };
